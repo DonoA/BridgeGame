@@ -50,24 +50,27 @@ h3 {
 
 .menu {
     position: absolute;
-    /* position menu on click */
-    left: var(--pointer-x);
-    top: var(--pointer-y);
+    left: 10px;
+    bottom: 10px;
 
     font-family: 'silkscreen';
 
     display: flex;
     flex-direction: column;
     padding: 5px;
-    width: 100px;
+    width: 340px;
     color: white;
     background-color: #00000077;
     border-radius: 5px;
-    /* top: calc(10px * var(--pixel-conversion));
-    left: calc(10px * var(--pixel-conversion)); */
 }
 
 .menu button {
+    margin-bottom: 10px;
+    width: 100px;
+    padding-left: 10px;
+}
+
+.stat-panel {
     margin-bottom: 10px;
 }
 
@@ -79,15 +82,33 @@ h3 {
     display: block;
 }
 
+button.disabled {
+    color: #bababa;
+    background-color: #5a5a5a;
+    cursor: not-allowed;
+}
+
     </style>
 </head>
 <body>
     <!-- webpack injects the script tag into body using HtmlWebPackPlugin -->
 
     <div id="menu" class="menu excalibur-scale hide">
-        <h3>Menu</h3>
-        <button id="add-unit">Add Unit</button>
-        <button id="remove-unit">Remove Unit</button>
+        <div id="stat-panel" class="stat-panel">
+            <div>Units: {units}</div>
+            <div>Gold: {gold}</div>
+            <div>Science: {science}</div>
+        </div>
+        <div>
+            <button id="train-unit">Train</button>
+            <button id="mine-gold">Mine</button>
+            <button id="add-science">Research</button>
+        </div>
+        <div>
+            <button id="auto-train">Buy Trainer</button>
+            <button id="auto-mine">Buy Miner</button>
+            <button id="auto-science">Buy Scholar</button>
+        </div>
     </div>
 </body>
 </html>

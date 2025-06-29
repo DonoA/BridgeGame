@@ -11,7 +11,6 @@ export class EnemyBase extends Base {
 
     override onInitialize(engine: Engine) {
         super.onInitialize(engine);
-
     }
 
     override doSpawning() {

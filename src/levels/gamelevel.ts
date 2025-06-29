@@ -5,6 +5,7 @@ import { Background } from "@/actors/background";
 import { GameState } from "@/game_state";
 import { PlayerBase } from "@/actors/player_base";
 import { EnemyBase } from "@/actors/enemy_base";
+import { Menu } from "@/actors/menu";
 
 export class GameLevel extends Scene {
     gameState: GameState;
@@ -34,22 +35,11 @@ export class GameLevel extends Scene {
         this.add(playerBase);
         this.add(enemyBase);
 
+        const menuController = new Menu(this);
+        this.add(menuController);
+
         const background = new Background(Resources.Background.toSprite(), vec(engine.drawWidth, engine.drawHeight));
-        this.add(background)
-
-        // Scene.onInitialize is where we recommend you perform the composition for your game
-        const testSoldier = new Soldier(this, {
-            homeBase: playerBase,
-
-            health: 10,
-            damage: 1,
-            spawn: playerBase.pos,
-            target: enemyBase.pos,
-            name: 'Test Soldier',
-            soldierColor: Color.Blue
-        });
-        this.gameState.playerSoldiers.push(testSoldier); // Store soldier in game state
-        this.add(testSoldier); // Actors need to be added to a scene to be drawn
+        this.add(background);
     }
 
     override onPreLoad(loader: DefaultLoader): void {

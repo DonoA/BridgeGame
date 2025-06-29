@@ -4,6 +4,7 @@ import { Color, Engine, vec } from "excalibur";
 import { Soldier } from "./soldier";
 
 export class PlayerBase extends Base {
+
     constructor(scene: GameLevel, config: BaseConfig) {
         super(scene, config);
         this.name = "PlayerBase";
@@ -11,7 +12,6 @@ export class PlayerBase extends Base {
 
     override onInitialize(engine: Engine) {
         super.onInitialize(engine);
-
     }
 
     override doSpawning() {
@@ -25,7 +25,15 @@ export class PlayerBase extends Base {
             name: "PlayerSoldier",
             soldierColor: Color.Blue,
         });
-        this.scene.gameState.playerSoldiers.push(soldier);
+        this.soldiers.push(soldier);
         this.scene.add(soldier);
+    }
+
+    addGold(amount: number) {
+        this.gold += amount;
+    }
+
+    addScience(amount: number) {
+        this.science += amount;
     }
 }

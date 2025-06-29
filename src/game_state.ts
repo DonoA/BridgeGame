@@ -1,9 +1,11 @@
 import { Base } from "./actors/base";
+import { EnemyBase } from "./actors/enemy_base";
+import { PlayerBase } from "./actors/player_base";
 import { Soldier } from "./actors/soldier";
 
 export class GameState {
-    playerBase: Base;
-    enemyBase: Base;
+    playerBase: PlayerBase;
+    enemyBase: EnemyBase;
     playerSoldiers: Soldier[] = [];
     enemySoldiers: Soldier[] = [];
 }

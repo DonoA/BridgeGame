@@ -14,6 +14,10 @@ export class Base extends Actor {
     health: number;
     baseColor: Color;
     wallOffset: number;
+    gold: number = 0; // Gold for spawning soldiers
+    science: number = 0; // Science for upgrades
+
+    soldiers: Soldier[] = []; // List of soldiers spawned by this base
 
     spawnRate: number = 5000; // milliseconds
     spawnTimer: number = 0;
@@ -47,7 +51,7 @@ export class Base extends Actor {
         }
     }
 
-    protected doSpawning() {
+    doSpawning() {
         
     }
 }
