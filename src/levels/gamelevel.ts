@@ -2,18 +2,14 @@ import { Scene, Engine, vec, Color, DefaultLoader, SceneActivationContext, Excal
 import { Soldier } from "../actors/soldier";
 import { Resources } from "@/resources";
 import { Background } from "@/actors/background";
-import { GameState } from "@/game_state";
+import { gameState } from "@/game_state";
 import { PlayerBase } from "@/actors/player_base";
 import { EnemyBase } from "@/actors/enemy_base";
 import { Menu } from "@/actors/menu";
 
 export class GameLevel extends Scene {
-    gameState: GameState;
 
     override onInitialize(engine: Engine): void {
-        console.log(engine.drawWidth, engine.drawHeight);
-        this.gameState = new GameState();
-
         const background = new Background(Resources.Background.toSprite(), vec(engine.drawWidth, engine.drawHeight));
         this.add(background)
 
@@ -21,10 +17,10 @@ export class GameLevel extends Scene {
             health: 100,
             location: vec(engine.drawWidth * 0.15, engine.drawHeight * 0.5),
             baseName: 'Player Base',
-            baseColor: Color.Green,
+            baseColor: Color.Blue,
             wallOffset: engine.drawWidth * 0.30
         });
-        this.gameState.playerBase = playerBase; // Store player base in game state
+        gameState.playerBase = playerBase; // Store player base in game state
 
         const enemyBase = new EnemyBase(this, {
             health: 100,
@@ -33,7 +29,7 @@ export class GameLevel extends Scene {
             baseColor: Color.Red,
             wallOffset: engine.drawWidth * 0.65
         });
-        this.gameState.enemyBase = enemyBase; // Store enemy base in game state
+        gameState.enemyBase = enemyBase; // Store enemy base in game state
 
         this.add(playerBase);
         this.add(enemyBase);

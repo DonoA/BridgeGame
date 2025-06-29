@@ -1,5 +1,5 @@
 import { GameLevel } from "@/levels/gamelevel";
-import { Actor, Circle, Collider, CollisionContact, CollisionType, Color, Engine, Font, GraphicsGroup, Scene, Side, Text, TextAlign, vec, Vector } from "excalibur";
+import { Actor, Circle, CircleCollider, Collider, CollisionContact, CollisionType, Color, Engine, Font, GraphicsGroup, Scene, Side, Text, TextAlign, vec, Vector } from "excalibur";
 import { Base } from "./base";
 import { Damagable } from "./damagable";
 
@@ -23,8 +23,9 @@ export class Soldier extends Actor implements Damagable {
 
     attackCooldown: number = 0; // Cooldown for attacking other soldiers
     attackCooldownTime: number = 250; // 1 second cooldown
-    attackRange: number = 50; // Range at which soldier can attack
+    attackRange: number = 5; // Range at which soldier can attack
     speed: number = 25;
+    radius: number = 15; // Radius of the soldier for collision detection
 
     target: Damagable | null = null; // Target to move towards
     scene: GameLevel;
@@ -33,9 +34,10 @@ export class Soldier extends Actor implements Damagable {
         super({
             name: config.name,
             pos: config.spawn,
-            width: 40,
-            height: 40,
             collisionType: CollisionType.Active,
+            collider: new CircleCollider({
+                radius: 15,
+            }),
         });
 
         this.targetMethod = config.targetMethod;
@@ -71,16 +73,16 @@ export class Soldier extends Actor implements Damagable {
             text: this.health.toString(),
             color: Color.White,
             origin: vec(0, 0),
-            font: new Font({ 
-                size: 15, 
+            font: new Font({
+                size: 15,
                 bold: true,
-                textAlign: TextAlign.Center, 
+                textAlign: TextAlign.Center,
             }),
         });
 
         const graphicsGroup = new GraphicsGroup({
             members: [
-                bodyGraphic, 
+                bodyGraphic,
                 {
                     offset: vec(17, 11),
                     graphic: this.healthText
@@ -89,14 +91,14 @@ export class Soldier extends Actor implements Damagable {
         });
 
         this.graphics.add(graphicsGroup);
-    
-        this.actions.delay(500);
+
+        this.actions.delay(100);
         this.actions.repeatForever(ctx => {
             if (this.target == null || this.target.health <= 0) {
                 this.target = this.targetMethod(this);
             } else {
                 const moveOffset = this.target.pos.sub(this.pos).normalize();
-                
+
                 ctx.moveBy({
                     offset: moveOffset,
                     durationMs: 100/this.speed,
@@ -119,7 +121,8 @@ export class Soldier extends Actor implements Damagable {
         }
 
         const targetDist = this.target ? this.target.pos.sub(this.pos).magnitude : Infinity;
-        if (targetDist <= this.attackRange && this.attackCooldown <= 0) {
+        const attackDistance = this.attackRange + this.radius + this.target.radius;
+        if (targetDist <= (attackDistance) && this.attackCooldown <= 0) {
             // Attack the current enemy target
             this.target.health -= this.damage;
             this.attackCooldown = this.attackCooldownTime; // Reset cooldown

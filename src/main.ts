@@ -1,4 +1,4 @@
-import { Color, DisplayMode, Engine, FadeInOut, SolverStrategy } from "excalibur";
+import { Color, DisplayMode, Engine, FadeInOut, SolverStrategy, vec, Vector } from "excalibur";
 import { loader, Resources } from "./resources";
 import { GameLevel } from "./levels/gamelevel";
 
@@ -26,5 +26,5 @@ engine.start('start', { // name of the start scene 'start'
     color: Color.ExcaliburBlue
   })
 }).then(() => {
-  // This is called when the game has started and the start scene is loaded
+
 });

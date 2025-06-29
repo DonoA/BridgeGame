@@ -1,9 +1,10 @@
 import { GameLevel } from "@/levels/gamelevel";
 import { Actor, Engine, Sprite, vec, Vector } from "excalibur";
 import { ReplaceText } from "./replace_text";
+import { gameState } from "@/game_state";
+import { setGameScale } from "@/lib/util";
 
 export class Menu extends Actor {
-
     menuDiv: HTMLElement;
     statPanel: ReplaceText;
 
@@ -11,8 +12,6 @@ export class Menu extends Actor {
     clickCooldownTime: number = 10000; // 1 second cooldown
 
     cooldownButtons: HTMLElement[] = [];
-
-    scene: GameLevel;
 
     constructor(scene: GameLevel) {
         super({
@@ -48,7 +47,6 @@ export class Menu extends Actor {
     }
 
     override onPreUpdate(engine: Engine, elapsedMs: number): void {
-        super.onPreUpdate(engine, elapsedMs);
         this.checkCooldownButtons(elapsedMs);
         this.updateStatPanel();
     }
@@ -69,7 +67,7 @@ export class Menu extends Actor {
     }
 
     private updateStatPanel() {
-        const playerBase = this.scene.gameState.playerBase;
+        const playerBase = gameState.playerBase;
         const statState = this.statPanel.state;
         statState.set('gold', playerBase.gold.toString());
         statState.set('science', playerBase.science.toString());
@@ -79,21 +77,21 @@ export class Menu extends Actor {
     trainUnit(element: HTMLElement, event: Event) {
         if (this.clickCooldown > 0) return; // Prevent action if cooldown is active
 
-        this.scene.gameState.playerBase.doSpawning();
+        gameState.playerBase.doSpawning();
         this.clickCooldown = this.clickCooldownTime; // Reset cooldown
     }
 
     mineGold() {
         if (this.clickCooldown > 0) return; // Prevent action if cooldown is active
 
-        this.scene.gameState.playerBase.addGold(1); // Add 1 gold
+        gameState.playerBase.addGold(1); // Add 1 gold
         this.clickCooldown = this.clickCooldownTime; // Reset cooldown
     }
 
     addScience() {
         if (this.clickCooldown > 0) return; // Prevent action if cooldown is active
 
-        this.scene.gameState.playerBase.addScience(1);
+        gameState.playerBase.addScience(1);
         this.clickCooldown = this.clickCooldownTime; // Reset cooldown
     }
 
@@ -110,8 +108,13 @@ export class Menu extends Actor {
     }
 
     override onInitialize() {
-        this.menuDiv.classList.remove('hide')
+        setGameScale(this.scene.engine);
 
-        // document.getElementById('')
+        const screen = this.scene.engine.screen;
+        const pageCoords = screen.worldToPageCoordinates(vec(10, screen.height - 210));
+        document.documentElement.style.setProperty('--menu-pos-x', `${pageCoords.x}px`);
+        document.documentElement.style.setProperty('--menu-pos-y', `${pageCoords.y}px`);
+
+        this.menuDiv.classList.remove('hide')
     }
 }

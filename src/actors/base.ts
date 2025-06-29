@@ -1,16 +1,17 @@
-import { Actor, Color, Engine, Font, GraphicsGroup, Rectangle, Text, TextAlign, vec, Vector } from "excalibur";
+import { Actor, Circle, CircleCollider, CollisionType, Color, Engine, Font, GraphicsGroup, Rectangle, Text, TextAlign, vec, Vector } from "excalibur";
 import { Soldier } from "./soldier";
 import { GameLevel } from "@/levels/gamelevel";
+import { Damagable } from "./damagable";
 
 export interface BaseConfig {
     health: number;
     location: Vector;
     baseName: string;
     baseColor: Color;
-    wallOffset: number; 
+    wallOffset: number;
 }
 
-export class Base extends Actor {
+export class Base extends Actor implements Damagable {
     health: number;
     baseColor: Color;
     wallOffset: number;
@@ -19,43 +20,49 @@ export class Base extends Actor {
 
     soldiers: Soldier[] = []; // List of soldiers spawned by this base
 
-    spawnRate: number = 1000; // milliseconds
+    spawnRate: number = 5000; // milliseconds
     spawnTimer: number = 0;
-
-    scene: GameLevel;
+    radius: number = 50; // Radius of the base for collision detection
 
     healthText: Text;
 
     constructor(scene: GameLevel, config: BaseConfig) {
         super({
-          name: config.baseName,
-          pos: config.location,
-          width: 100,
-          height: 100,
+            name: config.baseName,
+            pos: config.location,
+            collisionType: CollisionType.Fixed,
+            collider: new CircleCollider({
+                radius: 50,
+            }),
         });
 
         this.health = config.health;
         this.baseColor = config.baseColor;
         this.wallOffset = config.wallOffset;
-        this.scene = scene;
     }
 
     override onInitialize(engine: Engine) {
         this.healthText = new Text({
             text: this.health.toString(),
             color: Color.White,
-            font: new Font({ 
-                size: 25, 
+            font: new Font({
+                size: 25,
                 bold: true,
-                textAlign: TextAlign.Center, 
+                textAlign: TextAlign.Center,
             }),
         });
 
         this.graphics.add(new GraphicsGroup({
             members: [
+                new Circle({
+                    radius: 50,
+                    color: this.baseColor,
+                    strokeColor: Color.Black,
+                    lineWidth: 2,
+                }),
                 {
                     graphic: this.healthText,
-                    offset: vec(0, -200), // Position above the base
+                    offset: vec(50, 40), // Position above the base
                 }
             ]
         }));
@@ -78,6 +85,6 @@ export class Base extends Actor {
     }
 
     doSpawning() {
-        
+
     }
 }
