@@ -1,4 +1,4 @@
-import { Actor, Color, Engine, GraphicsGroup, Rectangle, Vector } from "excalibur";
+import { Actor, Color, Engine, Font, GraphicsGroup, Rectangle, Text, TextAlign, vec, Vector } from "excalibur";
 import { Soldier } from "./soldier";
 import { GameLevel } from "@/levels/gamelevel";
 
@@ -19,10 +19,12 @@ export class Base extends Actor {
 
     soldiers: Soldier[] = []; // List of soldiers spawned by this base
 
-    spawnRate: number = 5000; // milliseconds
+    spawnRate: number = 1000; // milliseconds
     spawnTimer: number = 0;
 
     scene: GameLevel;
+
+    healthText: Text;
 
     constructor(scene: GameLevel, config: BaseConfig) {
         super({
@@ -39,7 +41,24 @@ export class Base extends Actor {
     }
 
     override onInitialize(engine: Engine) {
-        
+        this.healthText = new Text({
+            text: this.health.toString(),
+            color: Color.White,
+            font: new Font({ 
+                size: 25, 
+                bold: true,
+                textAlign: TextAlign.Center, 
+            }),
+        });
+
+        this.graphics.add(new GraphicsGroup({
+            members: [
+                {
+                    graphic: this.healthText,
+                    offset: vec(0, -200), // Position above the base
+                }
+            ]
+        }));
     }
 
     override onPreUpdate(engine: Engine, elapsedMs: number): void {
@@ -49,6 +68,13 @@ export class Base extends Actor {
             this.spawnTimer = 0;
             this.doSpawning();
         }
+
+        this.healthText.text = this.health.toString();
+    }
+
+    getSoliders(): Soldier[] {
+        this.soldiers = this.soldiers.filter(s => s.health > 0); // Remove dead soldiers
+        return this.soldiers;
     }
 
     doSpawning() {

@@ -73,7 +73,7 @@ export class Menu extends Actor {
         const statState = this.statPanel.state;
         statState.set('gold', playerBase.gold.toString());
         statState.set('science', playerBase.science.toString());
-        statState.set('units', playerBase.soldiers.length.toString());
+        statState.set('units', playerBase.getSoliders().length.toString());
     }
 
     trainUnit(element: HTMLElement, event: Event) {

@@ -1,39 +1,44 @@
 import { GameLevel } from "@/levels/gamelevel";
 import { Actor, Circle, Collider, CollisionContact, CollisionType, Color, Engine, Font, GraphicsGroup, Scene, Side, Text, TextAlign, vec, Vector } from "excalibur";
 import { Base } from "./base";
+import { Damagable } from "./damagable";
 
 export interface SoldierConfig {
-    homeBase: Base;
-    health: number;
-    damage: number;
-    spawn: Vector;
-    target: Vector;
-    name: string;
-    soldierColor: Color;
+    homeBase?: Base;
+    health?: number;
+    damage?: number;
+    spawn?: Vector;
+    targetMethod?: (solider: Soldier) => Damagable | null;
+    name?: string;
+    soldierColor?: Color;
 }
 
-export class Soldier extends Actor {
+export class Soldier extends Actor implements Damagable {
     healthText: Text;
     health: number;
     damage: number;
-    target: Vector;
     soldierColor: Color;
     homeBase: Base;
+    targetMethod: (solider: Soldier) => Damagable;
 
-    currentEnemyTarget: Soldier | null = null;
     attackCooldown: number = 0; // Cooldown for attacking other soldiers
-    attackCooldownTime: number = 1000; // 1 second cooldown
+    attackCooldownTime: number = 250; // 1 second cooldown
+    attackRange: number = 50; // Range at which soldier can attack
+    speed: number = 25;
+
+    target: Damagable | null = null; // Target to move towards
+    scene: GameLevel;
 
     constructor(scene: GameLevel, config: SoldierConfig) {
         super({
-          name: config.name,
-          pos: config.spawn,
-          width: 40,
-          height: 40,
-          collisionType: CollisionType.Active,
+            name: config.name,
+            pos: config.spawn,
+            width: 40,
+            height: 40,
+            collisionType: CollisionType.Active,
         });
 
-        this.target = config.target;
+        this.targetMethod = config.targetMethod;
         this.health = config.health;
         this.damage = config.damage;
         this.soldierColor = config.soldierColor;
@@ -42,9 +47,21 @@ export class Soldier extends Actor {
         this.scene = scene;
     }
 
+    copy(config: SoldierConfig): Soldier {
+        return new Soldier(this.scene, {
+            homeBase: config.homeBase ?? this.homeBase,
+            health: config.health ?? this.health,
+            damage: config.damage ?? this.damage,
+            spawn: config.spawn ?? this.pos,
+            targetMethod: config.targetMethod ?? this.targetMethod,
+            name: config.name ?? this.name,
+            soldierColor: config.soldierColor ?? this.soldierColor,
+        });
+    }
+
     override onInitialize() {
         const bodyGraphic = new Circle({
-            radius: 20,
+            radius: 15,
             color: this.soldierColor,
             strokeColor: Color.Black,
             lineWidth: 2
@@ -65,7 +82,7 @@ export class Soldier extends Actor {
             members: [
                 bodyGraphic, 
                 {
-                    offset: vec(22, 15),
+                    offset: vec(17, 11),
                     graphic: this.healthText
                 }
             ],
@@ -75,13 +92,17 @@ export class Soldier extends Actor {
     
         this.actions.delay(500);
         this.actions.repeatForever(ctx => {
-            const moveOffset = this.target.sub(this.pos).normalize();
-            
-            ctx.moveBy({
-                offset: moveOffset,
-                durationMs: 10,
-                // easing: (t) => t * t // Quadratic easing
-            })
+            if (this.target == null || this.target.health <= 0) {
+                this.target = this.targetMethod(this);
+            } else {
+                const moveOffset = this.target.pos.sub(this.pos).normalize();
+                
+                ctx.moveBy({
+                    offset: moveOffset,
+                    durationMs: 100/this.speed,
+                    // easing: (t) => t * t // Quadratic easing
+                })
+            }
         });
     }
 
@@ -97,9 +118,10 @@ export class Soldier extends Actor {
             this.attackCooldown -= elapsedMs;
         }
 
-        if (this.currentEnemyTarget && this.attackCooldown <= 0) {
+        const targetDist = this.target ? this.target.pos.sub(this.pos).magnitude : Infinity;
+        if (targetDist <= this.attackRange && this.attackCooldown <= 0) {
             // Attack the current enemy target
-            this.currentEnemyTarget.health -= this.damage;
+            this.target.health -= this.damage;
             this.attackCooldown = this.attackCooldownTime; // Reset cooldown
         }
     }
@@ -108,7 +130,7 @@ export class Soldier extends Actor {
         if (other.owner instanceof Soldier) {
             if (this.homeBase !== other.owner.homeBase) {
                 // Enemy soldier
-                this.currentEnemyTarget = other.owner as Soldier;
+                this.target = other.owner as Soldier;
             }
         }
     }

@@ -2,8 +2,20 @@ import { GameLevel } from "@/levels/gamelevel";
 import { Base, BaseConfig } from "./base";
 import { Color, Engine, vec } from "excalibur";
 import { Soldier } from "./soldier";
+import { Damagable } from "./damagable";
+import { getClosestTarget, scatterLocation } from "@/lib/util";
 
 export class PlayerBase extends Base {
+
+    private soliderTemplate = new Soldier(this.scene, {
+        homeBase: this,
+        health: 2,
+        damage: 1,
+        spawn: vec(0, 0), // Placeholder, will be set in doSpawning
+        targetMethod: this.soliderTargetMethod.bind(this), // Placeholder, will be set in doSpawning
+        name: "PlayerSoldier",
+        soldierColor: Color.Blue,
+    });
 
     constructor(scene: GameLevel, config: BaseConfig) {
         super(scene, config);
@@ -14,16 +26,16 @@ export class PlayerBase extends Base {
         super.onInitialize(engine);
     }
 
+    soliderTargetMethod(soldier: Soldier): Damagable | null {
+        const targetBase = this.scene.gameState.enemyBase;
+        return getClosestTarget(targetBase.getSoliders(), soldier.pos) ?? targetBase;
+    }
+
     override doSpawning() {
+        const location = scatterLocation(this.pos, 50);
         // Spawn player soldiers
-        const soldier = new Soldier(this.scene, {
-            homeBase: this,
-            health: 10,
-            damage: 1,
-            spawn: this.pos.add(vec(200, 0)), // Spawn slightly above the base
-            target: this.scene.gameState.enemyBase.pos,
-            name: "PlayerSoldier",
-            soldierColor: Color.Blue,
+        const soldier = this.soliderTemplate.copy({
+            spawn: location, // Spawn slightly above the base
         });
         this.soldiers.push(soldier);
         this.scene.add(soldier);

@@ -14,6 +14,9 @@ export class GameLevel extends Scene {
         console.log(engine.drawWidth, engine.drawHeight);
         this.gameState = new GameState();
 
+        const background = new Background(Resources.Background.toSprite(), vec(engine.drawWidth, engine.drawHeight));
+        this.add(background)
+
         const playerBase = new PlayerBase(this, {
             health: 100,
             location: vec(engine.drawWidth * 0.15, engine.drawHeight * 0.5),
@@ -37,9 +40,6 @@ export class GameLevel extends Scene {
 
         const menuController = new Menu(this);
         this.add(menuController);
-
-        const background = new Background(Resources.Background.toSprite(), vec(engine.drawWidth, engine.drawHeight));
-        this.add(background);
     }
 
     override onPreLoad(loader: DefaultLoader): void {
